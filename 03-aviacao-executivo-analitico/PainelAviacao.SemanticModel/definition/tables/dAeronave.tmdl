@@ -1,0 +1,56 @@
+/// Dimensão de aeronaves: fabricante, porte e capacidade.
+table dAeronave
+	lineageTag: 7bdb3647-483a-5eb6-9cd1-efcec221e055
+
+	/// Modelo da aeronave
+	column Tipo
+		dataType: string
+		isKey
+		lineageTag: df5095d8-e933-5a0e-a7af-11abe75d323b
+		summarizeBy: none
+		sourceColumn: Tipo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Airbus, Boeing ou Embraer
+	column Fabricante
+		dataType: string
+		lineageTag: cb0ee42e-cdc5-5553-93b6-fc8e0f4b9ccd
+		summarizeBy: none
+		sourceColumn: Fabricante
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Assentos da configuração operada
+	column Capacidade
+		dataType: int64
+		formatString: #,0
+		lineageTag: c4eeef90-1415-5b72-93f7-ec55c63599cb
+		summarizeBy: none
+		sourceColumn: Capacidade
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Jato regional (E-Jets) ou narrow-body
+	column Porte
+		dataType: string
+		lineageTag: ef042c7f-2beb-5778-bc0a-041ab450a827
+		summarizeBy: none
+		sourceColumn: Porte
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dAeronave = m
+		mode: import
+		queryGroup: Dimensoes
+		source =
+				let
+				    Cols = Table.SelectColumns( Fonte, {"Tipo_Aeronave", "Capacidade_Aeronave"} ),
+				    Unicos = Table.Distinct( Cols, {"Tipo_Aeronave"} ),
+				    Renomeado = Table.RenameColumns( Unicos, {{"Tipo_Aeronave","Tipo"},{"Capacidade_Aeronave","Capacidade"}} ),
+				    Fabricante = Table.AddColumn( Renomeado, "Fabricante", each Text.BeforeDelimiter( [Tipo], " " ), type text ),
+				    Porte = Table.AddColumn( Fabricante, "Porte", each if [Fabricante] = "Embraer" then "Jato regional" else "Narrow-body", type text )
+				in
+				    Porte
+
+	annotation PBI_ResultType = Table

@@ -7,13 +7,14 @@ pela REST API. Prof. José Antonio de Paiva Júnior · Turma A.
 |---|---|---|
 | [01 · Hospitalar](01-hospitalar/) | Os cinco tipos de **visualização especializada** da aula 05: cartões/KPIs, treemap, mapa, matriz e tabela | 100 mil atendimentos · 6 páginas · 75 visuais · 49 medidas |
 | [02 · Companhia Aérea](02-companhia-aerea/) | Dashboard executivo respondendo as 15 perguntas do enunciado | 6.200 voos · 5 páginas · 62 objetos · 44 medidas |
+| [03 · Aviação: Executivo e Analítico](03-aviacao-executivo-analitico/) | Duas páginas para dois públicos — Visão Executiva (diretoria) e Visão Analítica (gestores) — com os erros do CSV corrigidos antes de modelar | 10.000 voos · 2 páginas · 41 visuais · 31 medidas |
 
 Cada pasta tem seu `README.md` (como publicar e republicar) e um `MAPA-DAS-PERGUNTAS.md`
 com a justificativa de cada escolha de visual.
 
 ## Os dados são lidos daqui mesmo
 
-Os dois modelos leem o CSV por HTTP deste repositório, com credencial anônima — sem gateway,
+Os modelos leem o CSV por HTTP deste repositório, com credencial anônima — sem gateway,
 sem OneDrive, e a atualização agendada funciona sem configuração extra. Dois parâmetros
 controlam isso em cada modelo:
 

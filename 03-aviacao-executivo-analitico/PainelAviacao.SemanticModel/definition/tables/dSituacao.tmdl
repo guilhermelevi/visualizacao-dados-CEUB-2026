@@ -1,0 +1,38 @@
+/// Dimensão de situação do voo. A ordem fixa as legendas em pontual → atrasado → cancelado.
+table dSituacao
+	lineageTag: 92dee3bb-b747-58f2-a8d8-299b5592a785
+
+	/// Pontual, Atrasado ou Cancelado
+	column Situacao
+		dataType: string
+		isKey
+		lineageTag: 274c8319-5d82-5b1c-a3f5-6e3f6977e139
+		summarizeBy: none
+		sourceColumn: Situacao
+		sortByColumn: Ordem
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Pontual = 1, Atrasado = 2, Cancelado = 3
+	column Ordem
+		dataType: int64
+		formatString: 0
+		lineageTag: 386678a3-4d88-5ed0-90d8-f77d2900497d
+		summarizeBy: none
+		sourceColumn: Ordem
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dSituacao = m
+		mode: import
+		queryGroup: Dimensoes
+		source =
+				let
+				    Lista = Table.Distinct( Table.SelectColumns( Fonte, {"Situacao_Voo"} ) ),
+				    Renomeado = Table.RenameColumns( Lista, {{"Situacao_Voo","Situacao"}} ),
+				    Ordem = Table.AddColumn( Renomeado, "Ordem", each
+				        if [Situacao] = "Pontual" then 1 else if [Situacao] = "Atrasado" then 2 else 3, Int64.Type )
+				in
+				    Ordem
+
+	annotation PBI_ResultType = Table

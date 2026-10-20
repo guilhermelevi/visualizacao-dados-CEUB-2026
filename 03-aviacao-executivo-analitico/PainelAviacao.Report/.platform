@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "PainelAviacao"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "03154d8a-ce60-5783-8eee-32cc7efd6d4a"
+  }
+}

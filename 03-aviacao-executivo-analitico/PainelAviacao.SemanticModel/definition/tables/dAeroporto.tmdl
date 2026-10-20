@@ -1,0 +1,74 @@
+/// Dimensão de aeroportos — união de origens e destinos, para nenhum aeroporto ficar de fora.
+table dAeroporto
+	lineageTag: 08f9c768-ef20-5bee-afe6-38e9d2b3bdcf
+
+	/// Código IATA do aeroporto
+	column IATA
+		dataType: string
+		isKey
+		lineageTag: c7bde33f-1af1-55d5-9aa4-6af7a3de318d
+		summarizeBy: none
+		sourceColumn: IATA
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Rótulo de exibição: código e cidade
+	column Aeroporto
+		dataType: string
+		lineageTag: af38229f-e651-5814-a751-82828eea6f67
+		summarizeBy: none
+		sourceColumn: Aeroporto
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Cidade atendida
+	column Cidade
+		dataType: string
+		lineageTag: 22b22bd0-6628-5b8f-a122-3cc5c4ea0960
+		dataCategory: City
+		summarizeBy: none
+		sourceColumn: Cidade
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Unidade da federação
+	column UF
+		dataType: string
+		lineageTag: 941fd0d1-41c3-5351-b01d-d57596dea866
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: UF
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Região do país
+	column Regiao
+		dataType: string
+		lineageTag: 3d4b992f-cd4d-5720-8076-7ee888b520d8
+		summarizeBy: none
+		sourceColumn: Regiao
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dAeroporto = m
+		mode: import
+		queryGroup: Dimensoes
+		source =
+				let
+				    Origem = Table.RenameColumns( Table.SelectColumns( Fonte, {"Aeroporto_Origem", "Cidade_Origem", "UF_Origem"} ),
+				        {{"Aeroporto_Origem","IATA"},{"Cidade_Origem","Cidade"},{"UF_Origem","UF"}} ),
+				    Destino = Table.RenameColumns( Table.SelectColumns( Fonte, {"Aeroporto_Destino", "Cidade_Destino", "UF_Destino"} ),
+				        {{"Aeroporto_Destino","IATA"},{"Cidade_Destino","Cidade"},{"UF_Destino","UF"}} ),
+				    Unicos = Table.Distinct( Table.Combine( {Origem, Destino} ), {"IATA"} ),
+				    Regiao = Table.AddColumn( Unicos, "Regiao", each
+				        if List.Contains( {"SP","RJ","MG","ES"}, [UF] ) then "Sudeste"
+				        else if List.Contains( {"PR","SC","RS"}, [UF] ) then "Sul"
+				        else if List.Contains( {"DF","GO","MT","MS"}, [UF] ) then "Centro-Oeste"
+				        else if List.Contains( {"AM","PA","AC","RO","RR","AP","TO"}, [UF] ) then "Norte"
+				        else "Nordeste", type text ),
+				    Rotulo = Table.AddColumn( Regiao, "Aeroporto", each [IATA] & " · " & [Cidade], type text ),
+				    Ordenado = Table.Sort( Rotulo, {{"IATA", Order.Ascending}} )
+				in
+				    Ordenado
+
+	annotation PBI_ResultType = Table

@@ -47,6 +47,51 @@ Se já existe, **eu valido antes de modelar**: contagem, período, distribuiçõ
 percentual de nulos, cardinalidade. Isso evita descobrir na última hora que 30% de
 uma coluna está vazia.
 
+#### Verificar erros no CSV — e corrigir, sempre
+
+Perfil estatístico não basta: um arquivo sem nulo nenhum ainda pode estar errado.
+**Todo CSV passa por uma auditoria de erros antes de entrar no modelo, e todo erro
+encontrado é corrigido** — painel construído sobre dado errado responde a pergunta
+errada, por mais bonito que fique. Erro conhecido e não corrigido não é aceitável,
+nem com nota de rodapé.
+
+Como fazer:
+
+1. **Preservar o bruto.** O arquivo recebido vai para `dados/bruto/` e nunca é editado.
+2. **Corrigir por script, nunca à mão.** Um `tratar_dados.py` lê o bruto, confere as
+   regras, aplica as correções e grava o arquivo tratado em `dados/` — que é o único que
+   o modelo lê. Rodar de novo produz o mesmo resultado.
+3. **Corrigir só o que está errado.** O script trabalha nas strings: linha sem erro sai
+   byte a byte igual ao bruto (sem `9` virar `9.0`). Conferir com `diff` quantas linhas mudaram.
+4. **Registrar.** O script gera `QUALIDADE-DOS-DADOS.md`: cada erro, quantas linhas, a
+   correção aplicada e o efeito que teria no painel. Vai junto na entrega.
+5. **Parar se não souber corrigir.** Regra violada sem correção conhecida faz o script sair
+   com erro — aí é investigar e decidir, não seguir em frente.
+
+O que conferir, no mínimo:
+
+| Tipo | Exemplos de regra |
+|---|---|
+| Unicidade | ID duplicado; linha duplicada com IDs diferentes |
+| Coerência de datas | `Ano`, `Mes`, `Ano_Mes`, dia da semana batem com a data; faixa horária bate com o horário |
+| Coerência de chaves | rota = `ORIGEM - DESTINO`; origem ≠ destino; cada código tem uma cidade/UF só; cada aeronave uma capacidade só |
+| Limites | contagem ≤ capacidade; nada negativo onde não pode; notas dentro da escala |
+| Contas derivadas | ocupação = passageiros ÷ capacidade; receita = passageiros × preço; lucro = receita − custo; margem = lucro ÷ receita |
+| Regra de negócio | pontual ≤ 15 min e atrasado > 15 min; pontual sem motivo, atrasado/cancelado com motivo |
+| **"Não se aplica" gravado como valor** | campo que não existe para aquela linha vindo preenchido (ver abaixo) |
+
+> **O erro mais traiçoeiro é o zero que significa "não se aplica".** No CSV de 10 mil voos
+> (exercício 03), os 382 cancelados vinham com `Atraso_Min = 0`, `Taxa_Ocupacao_Pct = 0`,
+> `Duracao_Real_Min = 0`, margem `0%` e um preço de passagem sem nenhum passageiro. Nenhuma
+> checagem de nulo pega isso — não há nulo. Mas todo zero entra na média como se fosse
+> medido: o atraso médio caía de 21,0 para 20,2 min e a ocupação de 75,3% para 72,4%. A
+> correção é **deixar vazio**: o Power BI ignora vazio nas médias e conta zero.
+> Zero verdadeiro (passageiros = 0, receita = 0 no cancelado) fica como está.
+
+Também anote o que **não é erro mas muda a leitura**: amostra pequena (rota com 1 voo
+lidera qualquer ranking de média — exija um mínimo de voos na medida), escala de
+percentual 0–100 vs 0–1, colunas por linha que não são somáveis (margem, ocupação).
+
 ### Etapa 3 — Modelo
 
 Star schema de verdade: **a fato guarda apenas chaves estrangeiras e métricas**. Todo
@@ -80,7 +125,8 @@ Demais regras:
 
 Layout em camadas, de cima para baixo: **título e filtros → KPIs → análises → detalhamento**.
 
-Cores com função, não decoração:
+**Cor é codificação, não decoração.** Toda cor no painel precisa responder "o que ela
+significa?". Se a resposta for "só pra não ficar tudo igual", a cor está errada — tire.
 
 | Cor | Significa |
 |---|---|
@@ -90,7 +136,22 @@ Cores com função, não decoração:
 | Vermelho | negativo (cancelamento, prejuízo) |
 | Cinza | secundário, apoio |
 
-Quando a categoria não carrega julgamento (região, mês, modelo), uso **uma cor só**.
+Três regras que saem daí:
+
+1. **Mesmo significado, mesma cor, no painel inteiro.** Se atraso é âmbar no gráfico de
+   barras, é âmbar no KPI, na linha do tempo e na matriz. Categoria que muda de cor entre
+   visuais faz o leitor reaprender a legenda a cada olhada.
+2. **Categoria sem julgamento → uma cor só.** Região, mês, modelo, especialidade: nada ali
+   é bom nem ruim, então nada ali merece matiz próprio. Um matiz único e, quando a
+   grandeza importa, uma rampa de luminosidade dentro dele — escuro = mais, claro = menos.
+   Isso é o oposto de dar um matiz a cada retângulo (ver *Treemap ignora cor por valor*).
+3. **Não colorir o que o eixo já diz.** Barra por categoria com uma cor por barra é
+   redundância: o rótulo já identifica. Reserve a cor para a única dimensão que ela ainda
+   não está carregando.
+
+Na prática: define a cor visual a visual, nunca confiando no tema (ver *Tema custom pela
+API não resolve o arquivo*), e derivando de uma paleta única no código — assim a mesma
+constante `VERDE` vai para todo lugar que significa "positivo".
 
 Todo visual leva título e subtítulo dizendo **qual pergunta responde**.
 
@@ -339,6 +400,17 @@ Table.TransformColumnTypes( …, {…}, "pt-BR" )
 Sem a cultura `"pt-BR"` no segundo, `1272,01` é lido como `127201` — cem vezes maior, sem
 erro nenhum. O painel abre, os totais ficam absurdos, e nada no log indica o motivo.
 
+O inverso também vale: `;` como separador **com ponto decimal** (caso do CSV de 10 mil voos)
+pede cultura `"en-US"`. Olhe o arquivo antes de copiar a consulta de outro exercício —
+o separador não diz qual é o decimal.
+
+### Campo vazio no CSV vira nulo, não zero
+
+Depois da correção de "não se aplica" (Etapa 2), o CSV tratado tem campos vazios. Na
+tipagem do Power Query, texto vazio convertido para número vira `null` — e é exatamente
+o que se quer: `AVERAGE` ignora, `SUM` trata como zero. Por isso a medida de atraso médio
+pode ser um `AVERAGE` simples, sem filtrar cancelados à mão.
+
 ### Fonte de dados na nuvem
 
 `File.Contents` com caminho local **não funciona** no Service. Opções, da mais simples:
@@ -368,7 +440,10 @@ erro nenhum. O painel abre, os totais ficam absurdos, e nada no log indica o mot
 └── projeto-powerbi/            ← repo git
     ├── <Projeto>.SemanticModel/    modelo em TMDL
     ├── <Projeto>.Report/           páginas e visuais em PBIR
-    ├── dados/<dados>.csv           fonte lida por HTTP
+    ├── dados/bruto/<dados>.csv     arquivo recebido, intocado
+    ├── dados/<dados>.csv           arquivo TRATADO — fonte lida por HTTP
+    ├── tratar_dados.py             audita e corrige o bruto (ver Etapa 2)
+    ├── QUALIDADE-DOS-DADOS.md      erros encontrados e corrigidos (gerado)
     ├── pbir.py                     fábricas de visual (paleta, molduras, campos)
     ├── build_report.py             gera definition/pages inteiro
     ├── validar.py                  checagens da camada 1

@@ -1,0 +1,184 @@
+/// Tabela dedicada às medidas do modelo. Não contém dados.
+table _Medidas
+	lineageTag: fb206ac4-a6ad-59e1-a0cb-4dfdcd255807
+
+	/// Todos os voos do período, inclusive os cancelados.
+	measure 'Voos Programados' = COUNTROWS( fVoos )
+		formatString: #,0
+		displayFolder: 01 Operação
+		lineageTag: a052dc70-7858-59a5-ad3c-7643414c11aa
+
+	/// Voos que decolaram: pontuais e atrasados.
+	measure 'Voos Realizados' = CALCULATE( [Voos Programados], KEEPFILTERS( fVoos[situacao_voo] <> "Cancelado" ) )
+		formatString: #,0
+		displayFolder: 01 Operação
+		lineageTag: 0f6d6015-e079-5ca8-a946-a3a096535d2f
+
+	/// Partiram com até 15 min de atraso.
+	measure 'Voos Pontuais' = CALCULATE( [Voos Programados], KEEPFILTERS( fVoos[situacao_voo] = "Pontual" ) )
+		formatString: #,0
+		displayFolder: 01 Operação
+		lineageTag: bab2f2c8-59a5-52a1-83ed-d6ee137f3501
+
+	/// Partiram com mais de 15 min de atraso.
+	measure 'Voos Atrasados' = CALCULATE( [Voos Programados], KEEPFILTERS( fVoos[situacao_voo] = "Atrasado" ) )
+		formatString: #,0
+		displayFolder: 01 Operação
+		lineageTag: 5d7cd7af-69a8-540a-afa9-bcf638dffa89
+
+	/// Programados e não realizados.
+	measure 'Voos Cancelados' = CALCULATE( [Voos Programados], KEEPFILTERS( fVoos[situacao_voo] = "Cancelado" ) )
+		formatString: #,0
+		displayFolder: 01 Operação
+		lineageTag: e5f2da98-f2d0-5462-9089-1e5119fc51d0
+
+	/// Pontuais sobre programados. Pontuais + atrasados + cancelados = 100%.
+	measure '% Pontuais' = DIVIDE( [Voos Pontuais], [Voos Programados] )
+		formatString: 0.0%
+		displayFolder: 01 Operação
+		lineageTag: 661b466e-cb42-5bf2-9830-1543f7119629
+
+	/// Atrasados sobre programados.
+	measure '% Atrasados' = DIVIDE( [Voos Atrasados], [Voos Programados] )
+		formatString: 0.0%
+		displayFolder: 01 Operação
+		lineageTag: e923e9f2-a9cb-5154-b9e0-b5a2489e1823
+
+	/// Cancelados sobre programados.
+	measure '% Cancelados' = DIVIDE( [Voos Cancelados], [Voos Programados] )
+		formatString: 0.0%
+		displayFolder: 01 Operação
+		lineageTag: c7e97a37-580e-5c42-9e54-38f59b5e15b5
+
+	/// Voos atrasados ou cancelados — os que têm motivo registrado.
+	measure 'Ocorrências' = CALCULATE( [Voos Programados], KEEPFILTERS( fVoos[situacao_voo] <> "Pontual" ) )
+		formatString: #,0
+		displayFolder: 01 Operação
+		lineageTag: 67cb50be-7090-5fde-b35d-038e74b96f1a
+
+	/// Média de atraso dos voos realizados. Cancelado tem atraso vazio e não entra na média.
+	measure 'Atraso Médio (min)' = AVERAGE( fVoos[atraso_min] )
+		formatString: #,0.0
+		displayFolder: 01 Operação
+		lineageTag: 355754c8-ff7d-5aa8-b8f2-ce78607a81dc
+
+	/// Quanto o voo atrasa quando atrasa.
+	measure 'Atraso Médio dos Atrasados (min)' = CALCULATE( [Atraso Médio (min)], KEEPFILTERS( fVoos[situacao_voo] = "Atrasado" ) )
+		formatString: #,0.0
+		displayFolder: 01 Operação
+		lineageTag: 657c4b97-fd7c-5ac7-a7b5-bfa13984939d
+
+	/// Atraso médio só onde há amostra: em rota com menos de 20 voos realizados no contexto, fica vazio — evita que 1 voo atrasado lidere o ranking.
+	measure 'Atraso Médio (rotas 20+ voos)' = IF( [Voos Realizados] >= 20, [Atraso Médio (min)] )
+		formatString: #,0.0
+		displayFolder: 01 Operação
+		lineageTag: 4c9f739e-44dc-5ac5-a6fc-f5cd14e249f6
+
+	/// Partidas + chegadas do aeroporto. Usa a relação inativa de destino para a segunda parcela.
+	measure 'Movimentos' = [Voos Programados] + CALCULATE( [Voos Programados], USERELATIONSHIP( fVoos[destino_iata], dAeroporto[IATA] ) )
+		formatString: #,0
+		displayFolder: 01 Operação
+		lineageTag: 33b92801-dc06-5220-985f-e45f61de4a70
+
+	/// Passageiros transportados.
+	measure 'Passageiros' = SUM( fVoos[passageiros] )
+		formatString: #,0
+		displayFolder: 02 Passageiros
+		lineageTag: 9dd216f1-ff0e-5d09-9078-a74d2cd7dcbe
+
+	/// Assentos dos voos que decolaram.
+	measure 'Assentos Ofertados' = CALCULATE( SUM( fVoos[capacidade] ), KEEPFILTERS( fVoos[situacao_voo] <> "Cancelado" ) )
+		formatString: #,0
+		displayFolder: 02 Passageiros
+		lineageTag: 4e9b56ed-2441-5520-85da-4b454a073e4c
+
+	/// Passageiros sobre assentos ofertados — ponderada, não média de percentuais.
+	measure 'Taxa de Ocupação' = DIVIDE( [Passageiros], [Assentos Ofertados] )
+		formatString: 0.0%
+		displayFolder: 02 Passageiros
+		lineageTag: a4d47be0-8f12-527d-9584-6789085b58b3
+
+	/// Nota média de 1 a 5.
+	measure 'Satisfação Média' = AVERAGE( fVoos[satisfacao] )
+		formatString: 0.00
+		displayFolder: 02 Passageiros
+		lineageTag: b0f9f5c5-d2af-5a82-a39d-dca67997187c
+
+	/// Receita bruta.
+	measure 'Receita' = SUM( fVoos[receita] )
+		formatString: "R$" #,0
+		displayFolder: 03 Financeiro
+		lineageTag: ac1d845c-6f88-5117-8636-b4f95794ab01
+
+	/// Custo operacional, inclusive o dos voos cancelados.
+	measure 'Custo Operacional' = SUM( fVoos[custo] )
+		formatString: "R$" #,0
+		displayFolder: 03 Financeiro
+		lineageTag: b36bb9d2-9901-5827-ba24-875b376b3bf7
+
+	/// Lucro (positivo) ou prejuízo (negativo).
+	measure 'Resultado' = [Receita] - [Custo Operacional]
+		formatString: "R$" #,0
+		displayFolder: 03 Financeiro
+		lineageTag: aeb5e352-5464-53b8-b9c7-a9420ba6de9e
+
+	/// Resultado sobre receita: Σ lucro ÷ Σ receita, nunca média das margens.
+	measure 'Margem' = DIVIDE( [Resultado], [Receita] )
+		formatString: 0.0%
+		displayFolder: 03 Financeiro
+		lineageTag: 1c0377a5-e355-5f4f-a9d3-d728ea32e8d1
+
+	/// Resultado dividido pelos voos programados.
+	measure 'Resultado Médio por Voo' = DIVIDE( [Resultado], [Voos Programados] )
+		formatString: "R$" #,0
+		displayFolder: 03 Financeiro
+		lineageTag: 3c976e93-b583-5896-ac56-88bb683d01b1
+
+	/// Tarifa média efetivamente realizada.
+	measure 'Receita por Passageiro' = DIVIDE( [Receita], [Passageiros] )
+		formatString: "R$" #,0.00
+		displayFolder: 03 Financeiro
+		lineageTag: 9c08971f-874b-5ba0-87c6-b9be030c7270
+
+	/// Custo incorrido em voos que não geraram receita.
+	measure 'Custo dos Cancelamentos' = CALCULATE( [Custo Operacional], KEEPFILTERS( fVoos[situacao_voo] = "Cancelado" ) )
+		formatString: "R$" #,0
+		displayFolder: 03 Financeiro
+		lineageTag: db938a2c-a308-51f8-9f94-df7ddb24a71d
+
+	/// Verde se lucro, vermelho se prejuízo — usada na formatação condicional.
+	measure 'Cor Resultado' = IF( [Resultado] < 0, "#C8414F", "#2E9B6B" )
+		displayFolder: 04 Contexto e cor
+		lineageTag: bd6b677d-46b7-55c1-acf7-1e61acb41f5e
+
+	/// Linha de contexto do cartão de voos.
+	measure 'Contexto Voos' = "de " & FORMAT( [Voos Programados], "#,0" ) & " programados"
+		displayFolder: 04 Contexto e cor
+		lineageTag: 2a50b7ff-411f-5b22-8b63-6f09fad783ec
+
+	/// Linha de contexto do cartão de passageiros.
+	measure 'Contexto Passageiros' = "ocupação de " & FORMAT( [Taxa de Ocupação], "0.0%" )
+		displayFolder: 04 Contexto e cor
+		lineageTag: 1435502b-aab7-525e-a68b-6b91c01daa39
+
+	/// Linha de contexto do cartão de receita.
+	measure 'Contexto Receita' = FORMAT( [Receita por Passageiro], "R$ #,0" ) & " por passageiro"
+		displayFolder: 04 Contexto e cor
+		lineageTag: 276f1b61-bee9-54bb-bc3e-9e3218b0146f
+
+	/// Linha de contexto do cartão de resultado.
+	measure 'Contexto Resultado' = "margem de " & FORMAT( [Margem], "0.0%" )
+		displayFolder: 04 Contexto e cor
+		lineageTag: 3c4dde22-deda-5ddb-8687-3b3f22c03778
+
+	/// Linha de contexto do cartão de atrasos.
+	measure 'Contexto Atrasos' = "atrasa em média " & FORMAT( [Atraso Médio dos Atrasados (min)], "0" ) & " min"
+		displayFolder: 04 Contexto e cor
+		lineageTag: f634b51f-6ab8-522e-9370-c6c1b9243d09
+
+	/// Linha de contexto do cartão de cancelamentos.
+	measure 'Contexto Cancelados' = FORMAT( [Voos Cancelados], "#,0" ) & " voos · custo de " & FORMAT( [Custo dos Cancelamentos] / 1000000, "R$ 0.0" ) & " mi"
+		displayFolder: 04 Contexto e cor
+		lineageTag: 800ec4b2-7eb2-5d78-8242-3d0f3ee9ff4b
+
+	annotation PBI_ResultType = Table

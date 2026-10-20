@@ -1,0 +1,51 @@
+/// Dimensão de motivos: separa o que a companhia controla do que é externo.
+table dMotivo
+	lineageTag: a1d095b1-c2e7-5e25-a1b8-691dfa486e02
+
+	/// Causa registrada do atraso ou cancelamento
+	column Motivo
+		dataType: string
+		isKey
+		lineageTag: cb3c9d65-7073-5bd0-b4e3-bfc1030618d9
+		summarizeBy: none
+		sourceColumn: Motivo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Controlável pela companhia, externa, ou sem ocorrência
+	column Natureza
+		dataType: string
+		lineageTag: ee87993a-c36b-549c-a0d1-53e16fbb4946
+		summarizeBy: none
+		sourceColumn: Natureza
+		sortByColumn: 'Ordem Natureza'
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Controlável = 1, Externa = 2, Sem ocorrência = 3
+	column 'Ordem Natureza'
+		dataType: int64
+		formatString: 0
+		lineageTag: f3dc6572-2f49-55c1-9a59-88c2bef19983
+		summarizeBy: none
+		sourceColumn: Ordem Natureza
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dMotivo = m
+		mode: import
+		queryGroup: Dimensoes
+		source =
+				let
+				    Lista = Table.Distinct( Table.SelectColumns( Fonte, {"Motivo_Ocorrencia"} ) ),
+				    Renomeado = Table.RenameColumns( Lista, {{"Motivo_Ocorrencia","Motivo"}} ),
+				    Natureza = Table.AddColumn( Renomeado, "Natureza", each
+				        if [Motivo] = "Sem ocorrência" then "Sem ocorrência"
+				        else if List.Contains( {"Condições meteorológicas", "Restrição aeroportuária"}, [Motivo] ) then "Externa"
+				        else "Controlável", type text ),
+				    Ordem = Table.AddColumn( Natureza, "Ordem Natureza", each
+				        if [Natureza] = "Controlável" then 1 else if [Natureza] = "Externa" then 2 else 3, Int64.Type )
+				in
+				    Ordem
+
+	annotation PBI_ResultType = Table

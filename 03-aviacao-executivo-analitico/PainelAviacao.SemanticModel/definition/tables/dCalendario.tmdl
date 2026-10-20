@@ -1,0 +1,123 @@
+/// Dimensão de datas, do primeiro ao último mês presente na fato. Marcada como tabela de datas.
+table dCalendario
+	lineageTag: 0e6ba352-cb7c-5c8e-a521-9829650fb7b4
+	dataCategory: Time
+
+	/// Data do calendário
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 1bbae372-93ce-59af-b2ab-626d7f25193b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Ano civil
+	column Ano
+		dataType: int64
+		formatString: 0
+		lineageTag: fe8be297-5cec-56d4-b3e3-898d2819e964
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Ano]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Trimestre do ano (T1 a T4)
+	column Trimestre
+		dataType: string
+		lineageTag: a3bdd86a-3016-51a7-8b66-15064a4bd97e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Trimestre]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Número do mês, usado para ordenar
+	column 'Numero do Mes'
+		dataType: int64
+		formatString: 0
+		lineageTag: 6c5218dc-2224-5b08-a9b0-8611d1307dc1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Numero do Mes]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Mês abreviado (jan, fev…)
+	column Mes
+		dataType: string
+		lineageTag: d7ba8d19-a54b-5db4-9098-6a87f764c24f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Mes]
+		sortByColumn: 'Numero do Mes'
+
+		annotation SummarizationSetBy = Automatic
+
+	/// AAAAMM, usado para ordenar a competência
+	column 'Indice Mes'
+		dataType: int64
+		formatString: 0
+		lineageTag: d53f6399-14a9-5543-bd82-5a1258e1f143
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Indice Mes]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Competência no formato jan/25
+	column 'Mes Ano'
+		dataType: string
+		lineageTag: a5852974-cc2b-5251-a776-d03d45e25fa0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Mes Ano]
+		sortByColumn: 'Indice Mes'
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Dia da semana (segunda = 1)
+	column 'Numero Dia Semana'
+		dataType: int64
+		formatString: 0
+		lineageTag: 42db0ecd-0553-5460-b479-634a47686772
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Numero Dia Semana]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Dia da semana por extenso
+	column 'Dia da Semana'
+		dataType: string
+		lineageTag: 6eef5274-9b14-5043-8ee8-3c9612eaf764
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Dia da Semana]
+		sortByColumn: 'Numero Dia Semana'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dCalendario = calculated
+		mode: import
+		source =
+				VAR _min = MIN( fVoos[data_voo] )
+				VAR _max = MAX( fVoos[data_voo] )
+				RETURN
+				ADDCOLUMNS(
+				    CALENDAR( DATE( YEAR( _min ), MONTH( _min ), 1 ), EOMONTH( _max, 0 ) ),
+				    "Ano",               YEAR( [Date] ),
+				    "Trimestre",         "T" & FORMAT( [Date], "Q" ),
+				    "Numero do Mes",     MONTH( [Date] ),
+				    "Mes",               FORMAT( [Date], "MMM", "pt-BR" ),
+				    "Indice Mes",        YEAR( [Date] ) * 100 + MONTH( [Date] ),
+				    "Mes Ano",           FORMAT( [Date], "MMM", "pt-BR" ) & "/" & FORMAT( [Date], "yy" ),
+				    "Numero Dia Semana", WEEKDAY( [Date], 2 ),
+				    "Dia da Semana",     FORMAT( [Date], "dddd", "pt-BR" )
+				)
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,84 @@
+/// Dimensão de rotas: extremos e extensão de cada par atendido.
+table dRota
+	lineageTag: da721025-4c08-570e-b890-c69eb791ed99
+
+	/// Par origem-destino, ex.: GRU - BSB
+	column Rota
+		dataType: string
+		isKey
+		lineageTag: 14cae8cf-bc2e-55b9-a21f-dd63f60d2d01
+		summarizeBy: none
+		sourceColumn: Rota
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Código do aeroporto de partida
+	column 'Origem IATA'
+		dataType: string
+		lineageTag: 3ceb6d89-4c0f-57a5-ac59-90a10e5db890
+		summarizeBy: none
+		sourceColumn: Origem IATA
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Código do aeroporto de chegada
+	column 'Destino IATA'
+		dataType: string
+		lineageTag: 4b9c3166-f1bc-512d-af6c-725fb58e0c36
+		summarizeBy: none
+		sourceColumn: Destino IATA
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Rota por extenso, cidade a cidade
+	column Trecho
+		dataType: string
+		lineageTag: 723d44b1-42a9-586d-bc8d-cb47e9edf7ba
+		summarizeBy: none
+		sourceColumn: Trecho
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Extensão da rota em km
+	column Distancia
+		dataType: int64
+		formatString: #,0
+		lineageTag: 816d35eb-0a51-55b6-9afa-1024ed403caf
+		summarizeBy: none
+		sourceColumn: Distancia
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Agrupa as rotas por extensão
+	column 'Faixa de Distancia' = SWITCH( TRUE(), dRota[Distancia] < 500, "Curta (até 500 km)", dRota[Distancia] < 1500, "Média (500 a 1.500 km)", "Longa (1.500 km ou mais)" )
+		dataType: string
+		lineageTag: 4ffc7a3e-48a0-52af-bf33-d23cd30cf646
+		summarizeBy: none
+		sortByColumn: 'Ordem Faixa Distancia'
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Ordenação das faixas de distância
+	column 'Ordem Faixa Distancia' = SWITCH( TRUE(), dRota[Distancia] < 500, 1, dRota[Distancia] < 1500, 2, 3 )
+		dataType: int64
+		formatString: 0
+		lineageTag: 82a5c371-02b7-5eb7-906c-af57a261c165
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dRota = m
+		mode: import
+		queryGroup: Dimensoes
+		source =
+				let
+				    Cols = Table.SelectColumns( Fonte, {"Rota", "Aeroporto_Origem", "Aeroporto_Destino", "Cidade_Origem", "Cidade_Destino", "Distancia_Km"} ),
+				    Unicos = Table.Distinct( Cols, {"Rota"} ),
+				    Trecho = Table.AddColumn( Unicos, "Trecho", each [Cidade_Origem] & " → " & [Cidade_Destino], type text ),
+				    Enxuto = Table.RemoveColumns( Trecho, {"Cidade_Origem", "Cidade_Destino"} ),
+				    Renomeado = Table.RenameColumns( Enxuto, {{"Aeroporto_Origem","Origem IATA"},{"Aeroporto_Destino","Destino IATA"},{"Distancia_Km","Distancia"}} ),
+				    Ordenado = Table.Sort( Renomeado, {{"Rota", Order.Ascending}} )
+				in
+				    Ordenado
+
+	annotation PBI_ResultType = Table

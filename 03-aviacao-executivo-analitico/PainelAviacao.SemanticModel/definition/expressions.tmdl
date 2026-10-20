@@ -1,0 +1,28 @@
+/// Host de onde o arquivo de dados é baixado.
+expression pUrlBase = "https://raw.githubusercontent.com" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 1ca02072-2120-51a6-9969-ed80ba5929b0
+	queryGroup: Parametros
+
+	annotation PBI_ResultType = Text
+
+/// Caminho do CSV TRATADO (saída de tratar_dados.py) dentro do repositório.
+expression pCaminhoCSV = "guilhermelevi/visualizacao-dados-CEUB-2026/main/03-aviacao-executivo-analitico/dados/companhia_aerea_10mil_voos.csv" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: ade5d5ce-56eb-5986-9473-64b584e40c52
+	queryGroup: Parametros
+
+	annotation PBI_ResultType = Text
+
+/// Consulta de estágio: lê e tipa o CSV uma vez só. Ponto decimal -> cultura en-US.
+expression Fonte =
+		let
+		    Conteudo = Web.Contents( pUrlBase, [RelativePath = pCaminhoCSV] ),
+		    Origem = Csv.Document( Conteudo, [Delimiter = ";", Columns = 31, Encoding = 65001, QuoteStyle = QuoteStyle.Csv] ),
+		    Cabecalho = Table.PromoteHeaders( Origem, [PromoteAllScalars = true] ),
+		    Tipos = Table.TransformColumnTypes( Cabecalho, {{"ID_Voo", type text}, {"Data_Voo", type date}, {"Ano", Int64.Type}, {"Mes", Int64.Type}, {"Ano_Mes", type text}, {"Dia_Semana", type text}, {"Horario_Partida", type text}, {"Faixa_Horaria", type text}, {"Aeroporto_Origem", type text}, {"Cidade_Origem", type text}, {"UF_Origem", type text}, {"Aeroporto_Destino", type text}, {"Cidade_Destino", type text}, {"UF_Destino", type text}, {"Rota", type text}, {"Tipo_Aeronave", type text}, {"Capacidade_Aeronave", Int64.Type}, {"Passageiros", Int64.Type}, {"Taxa_Ocupacao_Pct", type number}, {"Distancia_Km", Int64.Type}, {"Duracao_Prevista_Min", Int64.Type}, {"Duracao_Real_Min", Int64.Type}, {"Situacao_Voo", type text}, {"Atraso_Min", Int64.Type}, {"Motivo_Ocorrencia", type text}, {"Preco_Medio_Passagem_R$", type number}, {"Receita_R$", type number}, {"Custo_Operacional_R$", type number}, {"Lucro_R$", type number}, {"Margem_Lucro_Pct", type number}, {"Satisfacao_1a5", type number}}, "en-US" ),
+		    SemVazios = Table.SelectRows( Tipos, each [ID_Voo] <> null and [ID_Voo] <> "" )
+		in
+		    SemVazios
+	lineageTag: 7fe5e655-f0f1-5cd0-9f35-fe685bb8abc3
+	queryGroup: Estagio
+
+	annotation PBI_ResultType = Table

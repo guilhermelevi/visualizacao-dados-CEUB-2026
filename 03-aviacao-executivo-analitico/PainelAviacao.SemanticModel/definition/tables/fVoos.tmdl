@@ -1,0 +1,254 @@
+/// Tabela fato: um registro por voo programado. Só chaves e métricas — atributos descritivos vivem nas dimensões.
+table fVoos
+	lineageTag: 7522cd04-15c1-53ed-89e2-d2b2ae162b73
+
+	/// Identificador único do voo (chave degenerada)
+	column id_voo
+		dataType: string
+		lineageTag: 520893c7-cd35-56f2-95b6-6d8b6d5a6312
+		summarizeBy: none
+		sourceColumn: id_voo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Data do voo — chave para dCalendario
+	column data_voo
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f3182332-52d5-5f4c-82b0-2f1c4e0625d3
+		summarizeBy: none
+		sourceColumn: data_voo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Horário programado de partida (HH:MM)
+	column horario_partida
+		dataType: string
+		lineageTag: 28603668-4365-5518-bdae-0f426083e91c
+		summarizeBy: none
+		sourceColumn: horario_partida
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Manhã, tarde ou noite — derivada do horário de partida da própria linha
+	column faixa_horaria
+		dataType: string
+		lineageTag: cf027b16-f2d6-52a2-b068-8e44cfc6ffc5
+		summarizeBy: none
+		sourceColumn: faixa_horaria
+		sortByColumn: 'Ordem Faixa Horaria'
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Aeroporto de partida — chave para dAeroporto (relação ativa)
+	column origem_iata
+		dataType: string
+		lineageTag: 77e4d4f0-ac65-52b4-871b-9941ea11d59e
+		summarizeBy: none
+		sourceColumn: origem_iata
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Aeroporto de chegada — chave para dAeroporto (relação inativa, usada em Movimentos)
+	column destino_iata
+		dataType: string
+		lineageTag: aa16580f-99c3-5f29-90c9-cf182a306491
+		summarizeBy: none
+		sourceColumn: destino_iata
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Par origem-destino — chave para dRota
+	column rota
+		dataType: string
+		lineageTag: 2005c85a-4048-5dcd-a50b-969e44c7e3c5
+		summarizeBy: none
+		sourceColumn: rota
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Modelo da aeronave — chave para dAeronave
+	column tipo_aeronave
+		dataType: string
+		lineageTag: fe9f46d6-79a0-58fe-97a1-228501389525
+		summarizeBy: none
+		sourceColumn: tipo_aeronave
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Pontual, Atrasado ou Cancelado — chave para dSituacao
+	column situacao_voo
+		dataType: string
+		lineageTag: db35573c-2034-5f61-a48d-01b2bafeccac
+		summarizeBy: none
+		sourceColumn: situacao_voo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Causa do atraso ou cancelamento — chave para dMotivo
+	column motivo
+		dataType: string
+		lineageTag: 177a7b11-5327-5ec1-b6e1-ade323bd00cd
+		summarizeBy: none
+		sourceColumn: motivo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Assentos ofertados no voo
+	column capacidade
+		dataType: int64
+		formatString: #,0
+		lineageTag: 42f5c372-e20f-5b80-b30c-f66762b48d5e
+		summarizeBy: sum
+		sourceColumn: capacidade
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Passageiros transportados
+	column passageiros
+		dataType: int64
+		formatString: #,0
+		lineageTag: b2805acc-0818-5e32-aef7-9247e7f71250
+		summarizeBy: sum
+		sourceColumn: passageiros
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Passageiros ÷ capacidade. Vazio em voo cancelado
+	column taxa_ocupacao
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 4b4f6ace-ffbf-5bcf-ab6e-c5a4695c0be4
+		summarizeBy: none
+		sourceColumn: taxa_ocupacao
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Duração programada do voo em minutos
+	column duracao_prevista_min
+		dataType: int64
+		formatString: #,0
+		lineageTag: e558b908-1d57-5311-954e-4b73b1bb0cd1
+		summarizeBy: none
+		sourceColumn: duracao_prevista_min
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Duração realizada em minutos. Vazio em voo cancelado
+	column duracao_real_min
+		dataType: int64
+		formatString: #,0
+		lineageTag: f89e01b4-6852-544d-ac16-8621a3c34d92
+		summarizeBy: none
+		sourceColumn: duracao_real_min
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Minutos de atraso na partida. Vazio em voo cancelado
+	column atraso_min
+		dataType: int64
+		formatString: #,0
+		lineageTag: 55aab401-427b-5dcc-a342-7c1988bf5b71
+		summarizeBy: none
+		sourceColumn: atraso_min
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Preço médio pago por passageiro. Vazio em voo cancelado
+	column preco_medio
+		dataType: double
+		formatString: "R$" #,0
+		lineageTag: 05cea799-d082-566e-ada7-61908c2ab836
+		summarizeBy: none
+		sourceColumn: preco_medio
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Receita bruta do voo
+	column receita
+		dataType: double
+		formatString: "R$" #,0
+		lineageTag: d016e5ad-8dcb-5401-b034-9889632138f3
+		summarizeBy: sum
+		sourceColumn: receita
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Custo operacional do voo (existe também no cancelado)
+	column custo
+		dataType: double
+		formatString: "R$" #,0
+		lineageTag: e4ecdea1-bd68-5b38-abe7-9697d0281554
+		summarizeBy: sum
+		sourceColumn: custo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Receita menos custo
+	column lucro
+		dataType: double
+		formatString: "R$" #,0
+		lineageTag: 93901a25-9ab5-5c10-87e1-fe6b6e5a9e3e
+		summarizeBy: sum
+		sourceColumn: lucro
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Nota média de satisfação, de 1 a 5
+	column satisfacao
+		dataType: double
+		formatString: 0.0
+		lineageTag: d472f4b4-a2ca-5904-9873-645e3db8f22f
+		summarizeBy: none
+		sourceColumn: satisfacao
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Ordenação de manhã, tarde e noite
+	column 'Ordem Faixa Horaria' = SWITCH( fVoos[faixa_horaria], "Manhã", 1, "Tarde", 2, 3 )
+		dataType: int64
+		formatString: 0
+		lineageTag: d8c4cb60-077b-5102-a35d-50d8a9cd61be
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Agrupa a ocupação da linha em faixas
+	column 'Faixa de Ocupacao' =
+			VAR o = fVoos[taxa_ocupacao]
+			RETURN
+			    SWITCH( TRUE(),
+			        ISBLANK( o ), "Cancelado",
+			        o < 0.6,  "Abaixo de 60%",
+			        o < 0.75, "60% a 75%",
+			        o < 0.9,  "75% a 90%",
+			        "90% ou mais"
+			    )
+		dataType: string
+		lineageTag: be31cec4-714b-5408-b3e0-2df590673d6f
+		summarizeBy: none
+		sortByColumn: 'Ordem Faixa Ocupacao'
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Ordenação das faixas de ocupação
+	column 'Ordem Faixa Ocupacao' = VAR o = fVoos[taxa_ocupacao] RETURN SWITCH( TRUE(), ISBLANK( o ), 0, o < 0.6, 1, o < 0.75, 2, o < 0.9, 3, 4 )
+		dataType: int64
+		formatString: 0
+		lineageTag: cef2781b-4387-5e6d-b773-1563a5667efb
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fVoos = m
+		mode: import
+		queryGroup: Fato
+		source =
+				let
+				    Colunas = Table.SelectColumns( Fonte, { "ID_Voo", "Data_Voo", "Horario_Partida", "Faixa_Horaria", "Aeroporto_Origem", "Aeroporto_Destino", "Rota", "Tipo_Aeronave", "Situacao_Voo", "Motivo_Ocorrencia", "Capacidade_Aeronave", "Passageiros", "Taxa_Ocupacao_Pct", "Duracao_Prevista_Min", "Duracao_Real_Min", "Atraso_Min", "Preco_Medio_Passagem_R$", "Receita_R$", "Custo_Operacional_R$", "Lucro_R$", "Satisfacao_1a5" } ),
+				    Ocupacao = Table.TransformColumns( Colunas, {{"Taxa_Ocupacao_Pct", each _ / 100, type number}} ),
+				    Renomeado = Table.RenameColumns( Ocupacao, {{"ID_Voo","id_voo"},{"Data_Voo","data_voo"},{"Horario_Partida","horario_partida"},{"Faixa_Horaria","faixa_horaria"},{"Aeroporto_Origem","origem_iata"},{"Aeroporto_Destino","destino_iata"},{"Rota","rota"},{"Tipo_Aeronave","tipo_aeronave"},{"Situacao_Voo","situacao_voo"},{"Motivo_Ocorrencia","motivo"},{"Capacidade_Aeronave","capacidade"},{"Passageiros","passageiros"},{"Taxa_Ocupacao_Pct","taxa_ocupacao"},{"Duracao_Prevista_Min","duracao_prevista_min"},{"Duracao_Real_Min","duracao_real_min"},{"Atraso_Min","atraso_min"},{"Preco_Medio_Passagem_R$","preco_medio"},{"Receita_R$","receita"},{"Custo_Operacional_R$","custo"},{"Lucro_R$","lucro"},{"Satisfacao_1a5","satisfacao"}} )
+				in
+				    Renomeado
+
+	annotation PBI_ResultType = Table
