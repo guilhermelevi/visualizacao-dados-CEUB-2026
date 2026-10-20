@@ -3,10 +3,10 @@
   "name": "vceb6723840a80",
   "position": {
     "x": 24,
-    "y": 208,
+    "y": 206,
     "z": 8,
-    "width": 740,
-    "height": 318
+    "width": 600,
+    "height": 300
   },
   "visual": {
     "visualType": "lineChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dCalendario.Mes Ano",
-              "nativeQueryRef": "Competência"
+              "nativeQueryRef": "Competência",
+              "displayName": "Competência"
             }
           ]
         },

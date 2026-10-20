@@ -3,10 +3,10 @@
   "name": "v302184e60543e",
   "position": {
     "x": 822,
-    "y": 13,
+    "y": 8,
     "z": 4,
     "width": 210,
-    "height": 54
+    "height": 64
   },
   "visual": {
     "visualType": "slicer",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dAeroporto.Aeroporto",
-              "nativeQueryRef": "Aeroporto de origem"
+              "nativeQueryRef": "Aeroporto de origem",
+              "displayName": "Aeroporto de origem"
             }
           ]
         }

@@ -35,13 +35,18 @@ def vid(prefix="v"):
     return "%s%s" % (prefix, h)
 
 # ---------- campos ----------
+def _rotulo(proj, alias):
+    """O nativeQueryRef não muda o rótulo exibido: só displayName renomeia eixo, legenda e coluna."""
+    if alias: proj["displayName"] = alias
+    return proj
+
 def fcol(entity, prop, alias=None):
-    return {"field": {"Column": {"Expression": {"SourceRef": {"Entity": entity}}, "Property": prop}},
-            "queryRef": "%s.%s" % (entity, prop), "nativeQueryRef": alias or prop}
+    return _rotulo({"field": {"Column": {"Expression": {"SourceRef": {"Entity": entity}}, "Property": prop}},
+                    "queryRef": "%s.%s" % (entity, prop), "nativeQueryRef": alias or prop}, alias)
 
 def fmea(prop, alias=None, entity="_Medidas"):
-    return {"field": {"Measure": {"Expression": {"SourceRef": {"Entity": entity}}, "Property": prop}},
-            "queryRef": "%s.%s" % (entity, prop), "nativeQueryRef": alias or prop}
+    return _rotulo({"field": {"Measure": {"Expression": {"SourceRef": {"Entity": entity}}, "Property": prop}},
+                    "queryRef": "%s.%s" % (entity, prop), "nativeQueryRef": alias or prop}, alias)
 
 def sort_by_measure(prop, direction="Descending", entity="_Medidas"):
     return {"sort": [{"field": {"Measure": {"Expression": {"SourceRef": {"Entity": entity}},
@@ -207,7 +212,8 @@ def barras(pos, category, measure, title, subtitle, *, vtype="clusteredBarChart"
     o["dataPoint"] = series_colors if series_colors else props(fill=solid(color))
     return visual(vid(), pos, vtype, q, o, frame(title, subtitle), filters)
 
-def linha(pos, category, values, title, subtitle, *, colors=None, sort_column=None, axis_units=0):
+def linha(pos, category, values, title, subtitle, *, colors=None, sort_column=None, axis_units=0,
+          continuo=False):
     q = qs(Category=[fcol(*category)], Y=[fmea(*v) for v in values])
     if sort_column: q["sortDefinition"] = sort_by_column(*sort_column)
     va = eixo(grid=True)
@@ -217,6 +223,8 @@ def linha(pos, category, values, title, subtitle, *, colors=None, sort_column=No
          "valueAxis": va,
          "labels": props(show=b(False)),
          "lineStyles": props(strokeWidth=d(2.5))}
+    if continuo:   # eixo categórico com muitos meses ganha barra de rolagem em visual estreito
+        o["categoryAxis"][0]["properties"]["axisType"] = s("Scalar")
     if colors:
         o["dataPoint"] = [{"properties": {"fill": solid(c)}, "selector": {"metadata": "_Medidas.%s" % m}}
                           for m, c in colors]

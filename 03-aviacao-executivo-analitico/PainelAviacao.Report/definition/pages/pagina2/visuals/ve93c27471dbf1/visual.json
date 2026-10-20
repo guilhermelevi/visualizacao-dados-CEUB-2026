@@ -3,10 +3,10 @@
   "name": "ve93c27471dbf1",
   "position": {
     "x": 848,
-    "y": 158,
+    "y": 170,
     "z": 9,
     "width": 408,
-    "height": 270
+    "height": 292
   },
   "visual": {
     "visualType": "barChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dAeroporto.Aeroporto",
-              "nativeQueryRef": "Aeroporto"
+              "nativeQueryRef": "Aeroporto",
+              "displayName": "Aeroporto"
             }
           ]
         },
@@ -45,7 +46,8 @@
                 }
               },
               "queryRef": "dSituacao.Situacao",
-              "nativeQueryRef": "Situação"
+              "nativeQueryRef": "Situação",
+              "displayName": "Situação"
             }
           ]
         },
@@ -63,7 +65,8 @@
                 }
               },
               "queryRef": "_Medidas.Movimentos",
-              "nativeQueryRef": "Voos"
+              "nativeQueryRef": "Voos",
+              "displayName": "Voos"
             }
           ]
         }
@@ -564,7 +567,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Pergunta 2 · partidas + chegadas, por situação do voo'"
+                  "Value": "'Pergunta 2 · partidas + chegadas, por situação · role para ver os 14'"
                 }
               }
             },

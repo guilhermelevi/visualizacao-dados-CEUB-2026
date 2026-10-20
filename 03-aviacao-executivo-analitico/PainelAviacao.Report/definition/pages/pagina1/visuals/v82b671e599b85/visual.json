@@ -3,10 +3,10 @@
   "name": "v82b671e599b85",
   "position": {
     "x": 892,
-    "y": 538,
+    "y": 514,
     "z": 11,
     "width": 364,
-    "height": 160
+    "height": 184
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dSituacao.Situacao",
-              "nativeQueryRef": "Situação"
+              "nativeQueryRef": "Situação",
+              "displayName": "Situação"
             }
           ]
         },
@@ -45,10 +46,29 @@
                 }
               },
               "queryRef": "_Medidas.Satisfação Média",
-              "nativeQueryRef": "Satisfação"
+              "nativeQueryRef": "Satisfação",
+              "displayName": "Satisfação"
             }
           ]
         }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Medidas"
+                  }
+                },
+                "Property": "Satisfação Média"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
       }
     },
     "objects": {

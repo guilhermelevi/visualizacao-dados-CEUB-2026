@@ -5,8 +5,8 @@
     "x": 24,
     "y": 88,
     "z": 6,
-    "width": 150,
-    "height": 62
+    "width": 133,
+    "height": 74
   },
   "visual": {
     "visualType": "card",
@@ -51,7 +51,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "17D"
+                  "Value": "18D"
                 }
               }
             },
@@ -65,7 +65,7 @@
             "labelDisplayUnits": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "1D"
                 }
               }
             }

@@ -272,6 +272,12 @@ com skeleton infinito, e o export trava em 0% sem mensagem de erro.
   `Table.RenameColumns(…, {{"motivo_original","Motivo"}})`, a coluna precisa de
   `sourceColumn: Motivo`. Com o nome antigo o modelo importa sem erro e só o **refresh**
   falha, com `column does not exist in the rowset`.
+- **Coluna de ordenação não pode ser calculada a partir da coluna que ela ordena.**
+  `faixa_horaria` com `sortByColumn: 'Ordem Faixa Horaria'`, sendo a ordem um `SWITCH` em DAX
+  sobre `faixa_horaria`, importa sem erro e o refresh falha com `A circular dependency was
+  detected`. Calcule a ordem no Power Query (`Table.AddColumn`) — aí ela é coluna de origem.
+  Ordem calculada a partir de **outra** coluna (faixa de distância e sua ordem, ambas de
+  `Distancia`) funciona. O `validar.py` do exercício 03 checa isso.
 
 ### Publicar pela API: o `definition.pbir` tem DUAS formas
 
@@ -372,6 +378,35 @@ Nenhuma destas quebra o import. Todas estragam a leitura, e só aparecem no PDF.
 - **Sobreposição na mesma camada `z`.** Painéis compostos empilham um fundo e três visuais em
   `z` diferentes de propósito. O que nunca pode acontecer é dois visuais se sobreporem no
   **mesmo** `z` — cheque isso, é sempre erro de aritmética de layout.
+
+Do exercício 03 (dez defeitos na primeira leitura do PDF, todos invisíveis às camadas 1 e 2):
+
+- **O apelido do campo é `displayName`, não `nativeQueryRef`.** Pôr o rótulo curto em
+  `nativeQueryRef` não muda nada na tela: a tabela mostrou "Voos Programados" e "Taxa de
+  Ocupação" e cortou as colunas da direita, e a legenda mostrou "% Atrasados". O rótulo exibido
+  em eixo, legenda e cabeçalho vem de `"displayName"` na projeção.
+- **O PDF sai em en-US se você não pedir.** `ExportTo` sem locale devolveu `R$ 537.6M` e `9,618`
+  com o modelo inteiro em pt-BR. Passe `"powerBIReportConfiguration": {"settings":
+  {"locale": "pt-BR"}}`. As medidas de texto com `FORMAT` saem em pt-BR de qualquer jeito
+  (seguem a cultura do modelo) — e o cartão ao lado em en-US denuncia a mistura.
+- **`labelDisplayUnits` 0 é automático, e o automático arredonda demais.** 1.234.577
+  passageiros viraram "1M" e 10.000 voos, "10K". Use `1` (nenhuma unidade) para contagens.
+- **Eixo categórico com muitos meses ganha barra de rolagem.** 21 meses em ~480px esconderam
+  o último mês atrás de um scroll. Ou dê largura (~30px por categoria), ou use uma coluna de
+  **data** (início do mês) com `categoryAxis.axisType = 'Scalar'` — eixo contínuo não rola.
+- **Barras também rolam.** Top 10 em 270px mostrou 9; com 292px mostrou 10. Conte ~24px por barra
+  além de ~70px de título, subtítulo e legenda.
+- **Slicer em dropdown: 54px ainda corta a caixa.** 64px resolveu (o "~50px" acima é o mínimo
+  para o cabeçalho; a caixa precisa de mais).
+- **`sortDefinition` por coluna ignora o `sortByColumn` dela.** Ordenar o visual por
+  `dSituacao[Situacao]` saiu alfabético (atrasado, cancelado, pontual), embora a legenda dos
+  outros visuais respeite a ordem. Ordene pela medida quando ela der a sequência certa, ou
+  ponha a coluna de ordem na consulta.
+- **Rótulo dentro de segmento estreito fica ilegível.** Em barra empilhada, desligue os
+  rótulos de segmento e ligue `totals` (total da barra).
+- **Filtro Top N de visual funciona** — `filterConfig` com `type: "TopN"` e subconsulta
+  ordenada pela medida. É dinâmico (responde aos segmentadores), ao contrário da coluna
+  calculada "Top 15" do exercício 02, que é estática e cria a barra "Demais rotas".
 
 ### Mexer na estrutura do repositório quebra o que já está publicado
 

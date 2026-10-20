@@ -80,6 +80,17 @@ table dCalendario
 
 		annotation SummarizationSetBy = Automatic
 
+	/// Primeiro dia do mês — eixo contínuo de tempo, que não rola em visual estreito
+	column 'Inicio do Mes'
+		dataType: dateTime
+		formatString: mmm/yy
+		lineageTag: 91efd416-1c9c-560f-8872-4074a1ddb994
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Inicio do Mes]
+
+		annotation SummarizationSetBy = Automatic
+
 	/// Dia da semana (segunda = 1)
 	column 'Numero Dia Semana'
 		dataType: int64
@@ -116,6 +127,7 @@ table dCalendario
 				    "Mes",               FORMAT( [Date], "MMM", "pt-BR" ),
 				    "Indice Mes",        YEAR( [Date] ) * 100 + MONTH( [Date] ),
 				    "Mes Ano",           FORMAT( [Date], "MMM", "pt-BR" ) & "/" & FORMAT( [Date], "yy" ),
+				    "Inicio do Mes",     DATE( YEAR( [Date] ), MONTH( [Date] ), 1 ),
 				    "Numero Dia Semana", WEEKDAY( [Date], 2 ),
 				    "Dia da Semana",     FORMAT( [Date], "dddd", "pt-BR" )
 				)

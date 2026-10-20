@@ -3,10 +3,10 @@
   "name": "vd25ce403322ac",
   "position": {
     "x": 880,
-    "y": 13,
+    "y": 8,
     "z": 3,
     "width": 180,
-    "height": 54
+    "height": 64
   },
   "visual": {
     "visualType": "slicer",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dCalendario.Ano",
-              "nativeQueryRef": "Ano"
+              "nativeQueryRef": "Ano",
+              "displayName": "Ano"
             }
           ]
         }

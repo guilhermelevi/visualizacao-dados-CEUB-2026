@@ -3,10 +3,10 @@
   "name": "vc1cdcc9f61f7b",
   "position": {
     "x": 24,
-    "y": 158,
+    "y": 170,
     "z": 7,
     "width": 404,
-    "height": 270
+    "height": 292
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dRota.Rota",
-              "nativeQueryRef": "Rota"
+              "nativeQueryRef": "Rota",
+              "displayName": "Rota"
             }
           ]
         },
@@ -45,7 +46,8 @@
                 }
               },
               "queryRef": "_Medidas.Atraso Médio (rotas 20+ voos)",
-              "nativeQueryRef": "Atraso médio (min)"
+              "nativeQueryRef": "Atraso médio (min)",
+              "displayName": "Atraso médio (min)"
             }
           ]
         }

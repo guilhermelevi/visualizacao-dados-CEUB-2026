@@ -3,10 +3,10 @@
   "name": "vcdd427800f420",
   "position": {
     "x": 1068,
-    "y": 13,
+    "y": 8,
     "z": 4,
     "width": 188,
-    "height": 54
+    "height": 64
   },
   "visual": {
     "visualType": "slicer",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dCalendario.Mes",
-              "nativeQueryRef": "Mês"
+              "nativeQueryRef": "Mês",
+              "displayName": "Mês"
             }
           ]
         }

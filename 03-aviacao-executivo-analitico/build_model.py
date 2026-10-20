@@ -104,8 +104,10 @@ def fvoos():
         coluna(t, "custo", "double", "Custo operacional do voo (existe também no cancelado)", src="custo", fmt=MOEDA, soma="sum"),
         coluna(t, "lucro", "double", "Receita menos custo", src="lucro", fmt=MOEDA, soma="sum"),
         coluna(t, "satisfacao", "double", "Nota média de satisfação, de 1 a 5", src="satisfacao", fmt="0.0"),
+        # vem do Power Query: ordem calculada em DAX a partir da própria coluna que ela
+        # ordena gera dependência circular, e o refresh falha
         coluna(t, "Ordem Faixa Horaria", "int64", "Ordenação de manhã, tarde e noite",
-               expr='SWITCH( fVoos[faixa_horaria], "Manhã", 1, "Tarde", 2, 3 )', fmt="0"),
+               src="Ordem Faixa Horaria", fmt="0"),
         coluna(t, "Faixa de Ocupacao", "string", "Agrupa a ocupação da linha em faixas",
                expr='''
 VAR o = fVoos[taxa_ocupacao]
@@ -127,9 +129,11 @@ RETURN
 let
     Colunas = Table.SelectColumns( Fonte, { %s } ),
     Ocupacao = Table.TransformColumns( Colunas, {{"Taxa_Ocupacao_Pct", each _ / 100, type number}} ),
-    Renomeado = Table.RenameColumns( Ocupacao, {%s} )
+    Renomeado = Table.RenameColumns( Ocupacao, {%s} ),
+    OrdemFaixa = Table.AddColumn( Renomeado, "Ordem Faixa Horaria", each
+        if [faixa_horaria] = "Manhã" then 1 else if [faixa_horaria] = "Tarde" then 2 else 3, Int64.Type )
 in
-    Renomeado''' % (sel, ren)
+    OrdemFaixa''' % (sel, ren)
     return tabela(t, "Tabela fato: um registro por voo programado. Só chaves e métricas — atributos descritivos vivem nas dimensões.",
                   "\n".join(c) + "\n" + particao_m(t, "Fato", m))
 
@@ -145,6 +149,8 @@ def dcalendario():
          cc("Mes", "string", "Mês abreviado (jan, fev…)", ordem="Numero do Mes"),
          cc("Indice Mes", "int64", "AAAAMM, usado para ordenar a competência", fmt="0"),
          cc("Mes Ano", "string", "Competência no formato jan/25", ordem="Indice Mes"),
+         cc("Inicio do Mes", "dateTime", "Primeiro dia do mês — eixo contínuo de tempo, que não rola em visual estreito",
+            fmt="mmm/yy"),
          cc("Numero Dia Semana", "int64", "Dia da semana (segunda = 1)", fmt="0"),
          cc("Dia da Semana", "string", "Dia da semana por extenso", ordem="Numero Dia Semana")]
     src = '''
@@ -159,6 +165,7 @@ ADDCOLUMNS(
     "Mes",               FORMAT( [Date], "MMM", "pt-BR" ),
     "Indice Mes",        YEAR( [Date] ) * 100 + MONTH( [Date] ),
     "Mes Ano",           FORMAT( [Date], "MMM", "pt-BR" ) & "/" & FORMAT( [Date], "yy" ),
+    "Inicio do Mes",     DATE( YEAR( [Date] ), MONTH( [Date] ), 1 ),
     "Numero Dia Semana", WEEKDAY( [Date], 2 ),
     "Dia da Semana",     FORMAT( [Date], "dddd", "pt-BR" )
 )'''

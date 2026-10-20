@@ -3,10 +3,10 @@
   "name": "v7352376236756",
   "position": {
     "x": 664,
-    "y": 13,
+    "y": 8,
     "z": 3,
     "width": 150,
-    "height": 54
+    "height": 64
   },
   "visual": {
     "visualType": "slicer",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dCalendario.Ano",
-              "nativeQueryRef": "Ano"
+              "nativeQueryRef": "Ano",
+              "displayName": "Ano"
             }
           ]
         }

@@ -8,6 +8,9 @@ Projeto Power BI (formato **PBIP/PBIR**) do exercício de 20/10/2026: um relató
 | 1 · Visão Executiva | Diretoria | O que está acontecendo na companhia? |
 | 2 · Visão Analítica | Gestores e analistas | Onde estão os problemas e o que os explica? |
 
+**No ar:** [abrir no Power BI](https://app.powerbi.com/groups/d9b5fe16-3b73-4005-ab61-315bfdb7500a/reports/8f25cd98-1424-4f77-a7e0-7959311ad97f)
+· workspace **Aviacao CEUB**
+
 Star schema com 6 dimensões, 31 medidas DAX e 41 visuais. A cobertura de cada pergunta,
 as justificativas e os dois insights estão em [MAPA-DAS-PERGUNTAS.md](MAPA-DAS-PERGUNTAS.md).
 
@@ -29,6 +32,7 @@ QUALIDADE-DOS-DADOS.md                       ← erros encontrados e corrigidos 
 build_model.py                               ← gera PainelAviacao.SemanticModel (TMDL)
 build_report.py + pbir.py                    ← geram PainelAviacao.Report (PBIR)
 validar.py                                   ← checagens que rodam antes de publicar
+publicar.py                                  ← publica, confere por DAX e exporta PDF e .pbix
 PainelAviacao.pbip                           ← abre o projeto no Power BI Desktop
 ```
 
@@ -62,22 +66,42 @@ O CSV tratado é lido por HTTP, com credencial anônima, do repositório públic
 | `pUrlBase` | `https://raw.githubusercontent.com` |
 | `pCaminhoCSV` | `guilhermelevi/visualizacao-dados-CEUB-2026/main/03-aviacao-executivo-analitico/dados/companhia_aerea_10mil_voos.csv` |
 
-> ⚠️ **Esse arquivo ainda não está no GitHub.** Antes do primeiro refresh, é preciso subir
-> a pasta `03-aviacao-executivo-analitico/` no repositório (mesmo padrão de `01-hospitalar/`
-> e `02-companhia-aerea/`). Sem isso o refresh falha com "arquivo não encontrado".
+> Se o repositório voltar a ser privado, o refresh quebra: a URL raw precisa de acesso anônimo.
 
 O arquivo usa `;` como separador e **ponto** decimal — por isso a tipagem usa a cultura
 `"en-US"` (o contrário do CSV hospitalar). Campos vazios viram `null`, que as médias ignoram.
 
-## Publicar no Fabric
+## Status: publicado e validado
 
-Pela REST API, como nos exercícios 01 e 02 — ver `../../ROTEIRO-GERAR-PAINEL.md`, Etapa 5.
-Autenticação por device code (você abre o link e digita o código).
+| Item | Link |
+|---|---|
+| Relatório | https://app.powerbi.com/groups/d9b5fe16-3b73-4005-ab61-315bfdb7500a/reports/8f25cd98-1424-4f77-a7e0-7959311ad97f |
+| Semantic model | https://app.powerbi.com/groups/d9b5fe16-3b73-4005-ab61-315bfdb7500a/datasets/6355cf67-dec3-455f-aba6-fc834e8fdf18 |
 
-**Status: construído e conferido na camada 1, ainda não publicado.** A camada 2 —
-renderização — só existe depois de publicar.
+Publicado em 20/10/2026 pela REST API. As três camadas passaram:
 
-### Depois de publicar: números que a consulta DAX tem que devolver
+1. **Estrutural** — `validar.py`.
+2. **Números** — a consulta DAX devolveu exatamente os valores da tabela abaixo, o top 10 de
+   rotas e os movimentos por aeroporto calculados localmente.
+3. **Renderização** — PDF exportado e lido visual a visual. A primeira leitura pegou 10
+   defeitos que as camadas 1 e 2 não veem (números em en-US, "1M" no cartão, filtros e
+   textos cortados, eixos com barra de rolagem, apelidos de campo ignorados, ordem
+   alfabética na satisfação, rótulo ilegível); todos corrigidos e conferidos num segundo e
+   terceiro PDF. O PDF final está em `../ENTREGA/PainelAviacao.pdf`.
+
+## Republicar depois de editar
+
+```bash
+python3 build_model.py && python3 build_report.py && python3 validar.py
+python3 publicar.py <pasta-do-token> modelo d9b5fe16-3b73-4005-ab61-315bfdb7500a
+python3 publicar.py <pasta-do-token> refresh  d9b5fe16-3b73-4005-ab61-315bfdb7500a 6355cf67-dec3-455f-aba6-fc834e8fdf18
+python3 publicar.py <pasta-do-token> relatorio d9b5fe16-3b73-4005-ab61-315bfdb7500a 6355cf67-dec3-455f-aba6-fc834e8fdf18
+```
+
+O token vem do login por device code (ver o `ROTEIRO-GERAR-PAINEL.md` da raiz do curso,
+Etapa 5) e fica fora do repositório.
+
+### Números que a consulta DAX tem que devolver
 
 Sem filtros, período completo. Calculados direto do CSV tratado:
 
@@ -97,10 +121,9 @@ Sem filtros, período completo. Calculados direto do CSV tratado:
 
 Se o atraso médio vier **20,2** ou a ocupação **72,4%**, o modelo está lendo o CSV bruto.
 
-Depois: export PDF e leitura visual a visual. O ponto mais incerto é o **filtro Top N** do
-gráfico de rotas (primeiro uso dele nos projetos): se a barra sair com as 180 rotas, o
-filtro não foi aplicado.
-
 ## Entregar
 
-`../ENTREGA/` recebe o `.pbix` (exportado do Service depois de publicar) e o CSV tratado.
+`../ENTREGA/` tem o `PainelAviacao.pbix` (exportado do Service, com `DataModel` embutido —
+abre em qualquer Power BI Desktop sem depender do Fabric), o PDF das duas páginas, o CSV
+tratado e os documentos. O `.pbix` é um retrato: se o painel mudar, exporte de novo com
+`publicar.py … pbix`.

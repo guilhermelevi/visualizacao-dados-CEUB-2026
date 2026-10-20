@@ -205,11 +205,12 @@ table fVoos
 		annotation SummarizationSetBy = Automatic
 
 	/// Ordenação de manhã, tarde e noite
-	column 'Ordem Faixa Horaria' = SWITCH( fVoos[faixa_horaria], "Manhã", 1, "Tarde", 2, 3 )
+	column 'Ordem Faixa Horaria'
 		dataType: int64
 		formatString: 0
 		lineageTag: d8c4cb60-077b-5102-a35d-50d8a9cd61be
 		summarizeBy: none
+		sourceColumn: Ordem Faixa Horaria
 
 		annotation SummarizationSetBy = Automatic
 
@@ -247,8 +248,10 @@ table fVoos
 				let
 				    Colunas = Table.SelectColumns( Fonte, { "ID_Voo", "Data_Voo", "Horario_Partida", "Faixa_Horaria", "Aeroporto_Origem", "Aeroporto_Destino", "Rota", "Tipo_Aeronave", "Situacao_Voo", "Motivo_Ocorrencia", "Capacidade_Aeronave", "Passageiros", "Taxa_Ocupacao_Pct", "Duracao_Prevista_Min", "Duracao_Real_Min", "Atraso_Min", "Preco_Medio_Passagem_R$", "Receita_R$", "Custo_Operacional_R$", "Lucro_R$", "Satisfacao_1a5" } ),
 				    Ocupacao = Table.TransformColumns( Colunas, {{"Taxa_Ocupacao_Pct", each _ / 100, type number}} ),
-				    Renomeado = Table.RenameColumns( Ocupacao, {{"ID_Voo","id_voo"},{"Data_Voo","data_voo"},{"Horario_Partida","horario_partida"},{"Faixa_Horaria","faixa_horaria"},{"Aeroporto_Origem","origem_iata"},{"Aeroporto_Destino","destino_iata"},{"Rota","rota"},{"Tipo_Aeronave","tipo_aeronave"},{"Situacao_Voo","situacao_voo"},{"Motivo_Ocorrencia","motivo"},{"Capacidade_Aeronave","capacidade"},{"Passageiros","passageiros"},{"Taxa_Ocupacao_Pct","taxa_ocupacao"},{"Duracao_Prevista_Min","duracao_prevista_min"},{"Duracao_Real_Min","duracao_real_min"},{"Atraso_Min","atraso_min"},{"Preco_Medio_Passagem_R$","preco_medio"},{"Receita_R$","receita"},{"Custo_Operacional_R$","custo"},{"Lucro_R$","lucro"},{"Satisfacao_1a5","satisfacao"}} )
+				    Renomeado = Table.RenameColumns( Ocupacao, {{"ID_Voo","id_voo"},{"Data_Voo","data_voo"},{"Horario_Partida","horario_partida"},{"Faixa_Horaria","faixa_horaria"},{"Aeroporto_Origem","origem_iata"},{"Aeroporto_Destino","destino_iata"},{"Rota","rota"},{"Tipo_Aeronave","tipo_aeronave"},{"Situacao_Voo","situacao_voo"},{"Motivo_Ocorrencia","motivo"},{"Capacidade_Aeronave","capacidade"},{"Passageiros","passageiros"},{"Taxa_Ocupacao_Pct","taxa_ocupacao"},{"Duracao_Prevista_Min","duracao_prevista_min"},{"Duracao_Real_Min","duracao_real_min"},{"Atraso_Min","atraso_min"},{"Preco_Medio_Passagem_R$","preco_medio"},{"Receita_R$","receita"},{"Custo_Operacional_R$","custo"},{"Lucro_R$","lucro"},{"Satisfacao_1a5","satisfacao"}} ),
+				    OrdemFaixa = Table.AddColumn( Renomeado, "Ordem Faixa Horaria", each
+				        if [faixa_horaria] = "Manhã" then 1 else if [faixa_horaria] = "Tarde" then 2 else 3, Int64.Type )
 				in
-				    Renomeado
+				    OrdemFaixa
 
 	annotation PBI_ResultType = Table

@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "txt5f68b175131fe",
   "position": {
-    "x": 814,
+    "x": 732,
     "y": 88,
     "z": 6,
-    "width": 442,
-    "height": 62
+    "width": 524,
+    "height": 74
   },
   "visual": {
     "visualType": "textbox",
@@ -28,7 +28,7 @@
                     }
                   },
                   {
-                    "value": "GRU, CGH e GIG atrasam 40% das partidas (28 min em média), contra 23% nos outros 11 aeroportos — inclusive BSB, também hub. As 10 rotas mais atrasadas saem desses três.",
+                    "value": "GRU, CGH e GIG atrasam 40% das partidas (28 min em média), contra 23% nos outros 11 aeroportos — até BSB, também hub. As 10 rotas mais atrasadas saem deles.",
                     "textStyle": {
                       "fontSize": "8pt",
                       "color": "#63768A",
@@ -173,7 +173,7 @@
             "top": {
               "expr": {
                 "Literal": {
-                  "Value": "6D"
+                  "Value": "4D"
                 }
               }
             },
@@ -187,7 +187,7 @@
             "bottom": {
               "expr": {
                 "Literal": {
-                  "Value": "4D"
+                  "Value": "2D"
                 }
               }
             }

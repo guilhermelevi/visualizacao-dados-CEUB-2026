@@ -3,10 +3,10 @@
   "name": "v76ef1aea6dd7a",
   "position": {
     "x": 1040,
-    "y": 13,
+    "y": 8,
     "z": 5,
     "width": 216,
-    "height": 54
+    "height": 64
   },
   "visual": {
     "visualType": "slicer",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dSituacao.Situacao",
-              "nativeQueryRef": "Situação do voo"
+              "nativeQueryRef": "Situação do voo",
+              "displayName": "Situação do voo"
             }
           ]
         }

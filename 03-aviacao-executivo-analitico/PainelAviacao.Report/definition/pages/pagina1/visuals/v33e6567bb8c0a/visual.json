@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "v33e6567bb8c0a",
   "position": {
-    "x": 772,
-    "y": 208,
+    "x": 632,
+    "y": 206,
     "z": 9,
-    "width": 484,
-    "height": 318
+    "width": 624,
+    "height": 300
   },
   "visual": {
     "visualType": "hundredPercentStackedColumnChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dCalendario.Mes Ano",
-              "nativeQueryRef": "Competência"
+              "nativeQueryRef": "Competência",
+              "displayName": "Competência"
             }
           ]
         },
@@ -45,7 +46,8 @@
                 }
               },
               "queryRef": "dSituacao.Situacao",
-              "nativeQueryRef": "Situação"
+              "nativeQueryRef": "Situação",
+              "displayName": "Situação"
             }
           ]
         },
@@ -63,7 +65,8 @@
                 }
               },
               "queryRef": "_Medidas.Voos Programados",
-              "nativeQueryRef": "Voos"
+              "nativeQueryRef": "Voos",
+              "displayName": "Voos"
             }
           ]
         }

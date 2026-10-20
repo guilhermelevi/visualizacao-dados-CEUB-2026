@@ -3,10 +3,10 @@
   "name": "v5be57bee82a55",
   "position": {
     "x": 24,
-    "y": 436,
+    "y": 470,
     "z": 10,
     "width": 404,
-    "height": 268
+    "height": 234
   },
   "visual": {
     "visualType": "scatterChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dRota.Rota",
-              "nativeQueryRef": "Rota"
+              "nativeQueryRef": "Rota",
+              "displayName": "Rota"
             }
           ]
         },
@@ -45,7 +46,8 @@
                 }
               },
               "queryRef": "_Medidas.Taxa de Ocupação",
-              "nativeQueryRef": "Ocupação"
+              "nativeQueryRef": "Ocupação",
+              "displayName": "Ocupação"
             }
           ]
         },
@@ -63,7 +65,8 @@
                 }
               },
               "queryRef": "_Medidas.Margem",
-              "nativeQueryRef": "Margem"
+              "nativeQueryRef": "Margem",
+              "displayName": "Margem"
             }
           ]
         }

@@ -3,10 +3,10 @@
   "name": "txtc46311dd4cda0",
   "position": {
     "x": 24,
-    "y": 538,
+    "y": 514,
     "z": 10,
     "width": 860,
-    "height": 160
+    "height": 184
   },
   "visual": {
     "visualType": "textbox",
@@ -89,7 +89,7 @@
                     }
                   },
                   {
-                    "value": " (30,6% atrasados + 3,8% cancelados). O risco está no cliente: a satisfação cai de 4,30 no voo pontual para 2,71 no atrasado e 1,67 no cancelado, e os cancelamentos custaram R$ 4,5 mi sem gerar receita.",
+                    "value": " (30,6% atrasados + 3,8% cancelados). A satisfação cai de 4,30 no voo pontual para 2,71 no atrasado e 1,67 no cancelado; os cancelamentos custaram R$ 4,5 mi.",
                     "textStyle": {
                       "fontSize": "9.5pt",
                       "color": "#63768A",
@@ -124,7 +124,7 @@
                     }
                   },
                   {
-                    "value": "tornar a pontualidade meta da diretoria (atrasos abaixo de 20%) e investir parte da margem nos hubs de São Paulo e Rio, onde os atrasos se concentram — ver Visão Analítica.",
+                    "value": "tornar a pontualidade meta da diretoria (atrasos abaixo de 20%) e investir parte da margem nos hubs de São Paulo e Rio, onde os atrasos se concentram (ver Visão Analítica).",
                     "textStyle": {
                       "fontSize": "9.5pt",
                       "color": "#123A5E",

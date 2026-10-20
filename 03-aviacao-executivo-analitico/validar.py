@@ -51,6 +51,25 @@ for path in glob.glob(os.path.join(MODEL, "tables", "*.tmdl")):
 for t, c in sortby:
     check(c in tables[t], "%s: sortByColumn aponta para coluna inexistente %s" % (t, c))
 
+# coluna de ordenação calculada em DAX a partir da coluna que ela ordena = dependência
+# circular. Importa sem erro; só o refresh falha ("A circular dependency was detected")
+for path in glob.glob(os.path.join(MODEL, "tables", "*.tmdl")):
+    txt = open(path, encoding="utf-8").read()
+    tname = re.search(r"^table (\S+)", txt, re.M).group(1)
+    blocos = re.split(r"\n(?=\t(?:///|column |measure |partition ))", txt)
+    expr_de = {}
+    for bl in blocos:
+        m = re.match(r"\t(?:/// .*\n\t)?column ('[^']+'|\S+)( =)?", bl)
+        if m and m.group(2): expr_de[m.group(1).strip("'")] = bl.split("dataType:")[0]
+    for bl in blocos:
+        m = re.match(r"\t(?:/// .*\n\t)?column ('[^']+'|\S+)", bl)
+        s_ = re.search(r"sortByColumn: ('[^']+'|\S+)", bl)
+        if not (m and s_): continue
+        alvo, ordenada = s_.group(1).strip("'"), m.group(1).strip("'")
+        check("[%s]" % ordenada not in expr_de.get(alvo, ""),
+              "%s: '%s' é ordenada por '%s', que é calculada a partir dela — dependência circular"
+              % (tname, ordenada, alvo))
+
 # referências dentro das fórmulas DAX: Tabela[coluna] e [Medida]
 #   (erro de digitação aqui importa sem aviso e o visual sai vazio)
 for path in glob.glob(os.path.join(MODEL, "tables", "*.tmdl")):
